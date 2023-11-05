@@ -4,7 +4,6 @@ import math
 from datetime import datetime, time, timedelta
 import random
 
-#Drivers & Teams
 drivers = {'Albon':'Williams', 'Sargent':'Williams','Verstappen':'Red Bull','Perez':'Red Bull', 'Sainz':'Ferrari','Leclerc':'Ferrari',
             'Norris':'Mclaren', 'Piastri':'Mclaren','Hamilton':'Mercedes','Russel':'Mercedes', 'Hulkenberg':'Haas','Magnussen':'Haas','Ocon':'Alpine',
             'Gasly':'Alpine','Tsunoda':'Alpha Tauri','Lawson':'Alpha Tauri', 'Alonso':'Aston Martin','Stroll':'Aston Martin',
@@ -12,9 +11,9 @@ drivers = {'Albon':'Williams', 'Sargent':'Williams','Verstappen':'Red Bull','Per
 
 class F1():
 
-    def __init__(self):
+    def __init__():
         pass
-    
+
     def driverlist():
 
         #Print the driver and their team
@@ -49,64 +48,55 @@ class F1():
         #Print dict in readable order
         for key,value in drivertimes.items():
             print(key, ":", value)  
-        print("\n")
+       
         return drivertimes
         
-    
     def points():
         
+        global point_scorers
         #Grabs top 10 drivers to assign points
         drivers = {k: drivertimes[k] for k in list(drivertimes)[:20]}
         #Seperate out drivers in order of their times into just the drivers to add their points
         drivers = list(drivers.keys())
         points = [25,18,15,12,10,8,6,4,2,1,0,0,0,0,0,0,0,0,0,0]
         #combine the two lists into one dict. 
+       
         point_scorers = {}
-        
         for key in drivers:
             for value in points:
                 point_scorers[key]= value
                 points.remove(value)
-                break       
+                break   
                 
-        return point_scorers 
-    
-    def leaderboard():
-        
-        from pprint import pprint
-        point_scorers = F1.points()
- 
-        ham_points = ver_points = mag_points = alb_points = oco_points = hul_points = bot_points = 0
-        alo_points = tsu_points = per_points = rus_points = sai_points = lec_points = gas_points = 0
-        nor_points = str_points = zho_points = law_points = pia_points = sar_points = 0
-        
-        ham_points = point_scorers.get("Hamilton")
-        ver_points = point_scorers.get("Verstappen")
-        mag_points = point_scorers.get("Magnussen")
-        alb_points = point_scorers.get("Albon")
-        oco_points = point_scorers.get("Ocon")
-        hul_points = point_scorers.get("Hulkenberg")
-        bot_points = point_scorers.get("Bottas")
-        alo_points = point_scorers.get("Alonso")
-        tsu_points = point_scorers.get("Tsunoda")
-        per_points = point_scorers.get("Perez")
-        rus_points = point_scorers.get("Russel")
-        sai_points = point_scorers.get("Sainz")
-        lec_points = point_scorers.get("Leclerc")
-        gas_points = point_scorers.get("Gasly")
-        nor_points = point_scorers.get("Norris")
-        str_points = point_scorers.get("Stroll")
-        zho_points = point_scorers.get("Zhou")
-        law_points = point_scorers.get("Lawson")
-        pia_points = point_scorers.get("Piastri")
-        sar_points = point_scorers.get("Sargent")
-
+        print("\n")
         #Race leaderboard and points assigned
         point_scorers = {k:v for k, v in point_scorers.items()}
         for key,value in point_scorers.items():
             print(key, ":", value)
-            
+        
+        return point_scorers
+    
+program_on = True
+while program_on:
+    try:
         print("\n")
-        #Overall Leaderboard
-        overall_points = [ham_points, ver_points, mag_points, alb_points, oco_points, hul_points, bot_points, alo_points,tsu_points, per_points,rus_points,sai_points,lec_points,gas_points,nor_points,str_points,zho_points,law_points,pia_points,sar_points]
-        overall_points.sort(reverse=True)
+        x = int(input("1. See the list of drivers. \n2. Race! \n3. Overall Leaderboard \n4. Exit \n"))
+    except ValueError:
+        print("Please try again")
+        continue
+    else: 
+        if x == 1:
+            print("\n")
+            F1.driverlist()
+            continue
+        if x == 2:
+            print("\n")
+            F1.tracktimes()
+            F1.points()
+            continue
+        if x == 3:
+            print("\n")
+            F1.leaderboard()
+        if x == 4:
+            program_on = False
+            break
