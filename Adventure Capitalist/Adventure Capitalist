@@ -1,188 +1,207 @@
 import pygame
-from sys import exit
-from random import randint
-
-def display_score():
-    current_time = int(pygame.time.get_ticks() / 1000)- start_time
-    score_surf = test_font.render(f'Score: {current_time}',False,(64,64,64))
-    score_rect = score_surf.get_rect(center = (650,25))
-    screen.blit(score_surf,score_rect)
-    return current_time
-
-def obstacle_movement(obstacle_list):
-    if obstacle_list: 
-        for obstacle_rect in obstacle_list:
-            obstacle_rect.x -= 5
-            
-            if obstacle_rect.bottom == 500:  
-                screen.blit(snail_surface, obstacle_rect)
-            else:
-                screen.blit(fly_surface, obstacle_rect)
-        
-        obstacle_list = [obstacle for obstacle in obstacle_list if obstacle.x > 0]
-        
-        return obstacle_list
-    else: 
-        return []
-    
-def collisions(player,obstacles):
-    if obstacles:
-        for obstacle_rect in obstacles:
-            if player.colliderect(obstacle_rect):
-                return False
-    return True
-
-def player_animation():
-    global player_surf, player_index
-    
-    if player_rect.bottom < 500:
-        player_surf = player_jump
-    else:
-        player_index += 0.1
-        if player_index >= len(player_walk):
-            player_index = 0
-        player_surf = player_walk[int(player_index)]
-    
-
-#Game functionality & Globals
 pygame.init()
-screen = pygame.display.set_mode((800, 600))
-pygame.display.set_caption("Karl's game")
+
+#Colours library
+red = (255,0,0)
+green = (0,255,0)
+blue = (0,0,255)
+white = (255,255,255)
+black = (0,0,0)
+purple = (127,0,255)
+orange = (255,165,0)
+
+#Game Values
+green_value = 1
+red_value = 2.5
+orange_value = 5
+white_value = 10
+purple_value = 20
+
+#Draw Colour
+draw_green = False
+draw_red = False
+draw_orange = False
+draw_white = False
+draw_purple = False
+
+#Colour length
+green_length = 0
+red_length = 0
+orange_length = 0
+white_length = 0
+purple_length = 0
+
+#Speed
+green_speed = 5
+red_speed = 4
+orange_speed = 3
+white_speed = 2
+purple_speed = 1
+
+#Managers Functionality
+green_cost = 1
+green_owned = False
+green_manager_cost = 100
+
+red_cost = 2.5
+red_owned = False
+red_manager_cost = 500
+
+orange_cost = 5
+orange_owned = False
+orange_manager_cost = 1500
+
+white_cost = 10
+white_owned = False
+white_manager_cost = 5000
+
+purple_cost = 20
+purple_owned = False
+purple_manager_cost = 15000
+
+#Game base Functionality
+screen = pygame.display.set_mode((300, 450))
+pygame.display.set_caption("Idle Bakery")
 clock = pygame.time.Clock()
-test_font = pygame.font.Font("Pixeltype.ttf",50)
+font = pygame.font.Font('freesandbold.ttf',16)
+background = black
 game_active = True
-start_time = 0
-score = 0
+score = 250
 
-#Background declared. Convert images to python friendly version.
-sky_surface = pygame.image.load('Sky.png').convert()
-ground_surface = pygame.image.load("Ground.png").convert()
+def draw_task(colour,y_coord, value, draw, length, speed):
+    #Score for all funcs
+    global score
+    
+    #Rectangle drawing the fill
+    if draw and length < 200:
+        length += speed
+    elif length >=200:
+        draw = False
+        length = 0 
+        score += value 
+        
+    #Drawing
+    task = pygame.draw.circle(screen,colour, (30,y_coord),20,5)
+    pygame.draw.rect(screen, colour, [70, y_coord - 15, 200, 30])
+    pygame.draw.rect(screen, black, [75, y_coord - 10, 190, 20])
+    pygame.draw.rect(screen, colour, [70, y_coord - 15, length, 30])
+    
+    #Text for rect/circles
+    value_text = font.render(str(round(value,2)), True, white)
+    screen.blit(value_text, (16, y_coord -10))
+    return task, length, draw
 
-#Game Name
-text_surf = test_font.render("Robyn Runner!", False, (64,64,64))
-text_rect = text_surf.get_rect(center = (150,25))
-
-#Enemies & Logic
-snail_frame_1 = pygame.image.load("snail1.png").convert_alpha()
-snail_frame_2 = pygame.image.load("snail2.png").convert_alpha()
-snail_frames = [snail_frame_1,snail_frame_2]
-snail_frame_index = 0
-snail_surface =snail_frames[snail_frame_index]
-
-fly_frame_1 = pygame.image.load("Fly1.png").convert_alpha()
-fly_frame_2 = pygame.image.load("Fly2.png").convert_alpha()
-fly_frames = [fly_frame_1,fly_frame_2]
-fly_frame_index = 0
-fly_surface = fly_frames[fly_frame_index]
-
-#Overall enemy list
-obstacle_rect_list = []
-
-#Player declared. #draws a rectangle around the player. #Position, X,Y. Rectangle draw from point. Point in line with Ground Y
-player_walk_1 = pygame.image.load("player_walk_1.png").convert_alpha()
-player_walk_2 = pygame.image.load("player_walk_2.png").convert_alpha()
-player_walk = [player_walk_1, player_walk_2]
-player_index = 0
-player_jump = pygame.image.load("jump.png").convert_alpha()
-
-player_surf = player_walk[player_index]
-player_rect = player_surf.get_rect(midbottom = (100,500))
-player_gravity = 0
-
-#Game over interface
-player_stand = pygame.image.load("player_stand.png").convert_alpha()
-player_stand_scaled = pygame.transform.scale2x(player_stand)
-player_stand_rect = player_stand_scaled.get_rect(midbottom = (400,325))
-
-#Game over interface
-game_name = test_font.render("Robyn Runner!", False, (111,196,169))
-game_name_rect = game_name.get_rect(center = (400,100))
-
-#Game over interface
-play_again = test_font.render("Press space to play again!", False, (111,196,169))
-play_again_rect = play_again.get_rect(center = (400,400))
-
-#Enemy timers 
-obstacle_timer = pygame.USEREVENT + 1
-pygame.time.set_timer(obstacle_timer,1100)
-
-snail_animation_timer = pygame.USEREVENT + 2
-pygame.time.set_timer(snail_animation_timer,500)
-
-fly_animation_timer = pygame.USEREVENT + 3
-pygame.time.set_timer(fly_animation_timer,200)
+def draw_buttons(colour, x_coord, cost, owned, manager_cost):
+    
+    #Button attributes
+    colour_button = pygame.draw.rect(screen, colour,[x_coord,340,50,30])
+    colour_cost = font.render(str(round(cost,2)), True, black)
+    screen.blit(colour_cost, (x_coord + 6, 350))
+    
+    #When to black out after purchase
+    if not owned:
+        manager_button = pygame.draw.rect(screen, colour, [x_coord, 405,50,30])
+        manager_text = font.render(str(round(manager_cost,2)), True, black)
+        screen.blit(manager_text, (x_coord + 2, 410))
+    else: 
+        manager_button = pygame.draw.rect(screen, black, [x_coord, 405,50,30])
+    return colour_button, manager_button
 
 while True: 
+    clock.tick(60)
+    #game loop
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
-            exit()      
+            exit() 
+            #Manager owned or not
+        if green_owned and not draw_green:
+            draw_green = True
+        if red_owned and not draw_red:
+            draw_red = True
+        if orange_owned and not draw_orange:
+            draw_orange = True
+        if white_owned and not draw_white:
+            draw_white = True
+        if purple_owned and not draw_purple:
+            draw_purple = True
             
-        if game_active == False and event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-            game_active = True
-        
-        if game_active:
-            if event.type == obstacle_timer:
-                    if randint(0,2):
-                        obstacle_rect_list.append(snail_surface.get_rect(midbottom = (randint(900,1100),500)))
-                    else:
-                        obstacle_rect_list.append(fly_surface.get_rect(midbottom = (randint(900,1100),350)))
-            if event.type == snail_animation_timer:
-                if snail_frame_index == 0:
-                    snail_frame_index = 1
-                else:
-                    snail_frame_index = 0
-                snail_surface = snail_frames[snail_frame_index]
+            #Button interaction
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if task1.collidepoint(event.pos):
+                draw_green = True
+            if task2.collidepoint(event.pos):
+                draw_red = True
+            if task3.collidepoint(event.pos):
+                draw_orange = True
+            if task4.collidepoint(event.pos):
+                draw_white = True
+            if task5.collidepoint(event.pos):
+                draw_purple = True
                 
-            if event.type == fly_animation_timer:
-                if fly_frame_index == 0:
-                    fly_frame_index = 1
-                else:
-                    fly_frame_index = 0
-                fly_surface = fly_frames[fly_frame_index]
-        
+                #Manager cost + owned check
+            if green_manager_buy.collidepoint(event.pos) and score >= green_manager_cost and not green_owned:
+                green_owned = True
+                score -= green_manager_cost
+            if red_manager_buy.collidepoint(event.pos) and score >= red_manager_cost and not red_owned:
+                red_owned = True
+                score -= red_manager_cost
+            if orange_manager_buy.collidepoint(event.pos) and score >= orange_manager_cost and not orange_owned:
+                orange_owned = True
+                score -= orange_manager_cost
+            if white_manager_buy.collidepoint(event.pos) and score >= white_manager_cost and not white_owned:
+                white_owned = True
+                score -= white_manager_cost
+            if purple_manager_buy.collidepoint(event.pos) and score >= purple_manager_cost and not purple_owned:
+                purple_owned = True
+                score -= purple_manager_cost
+                
+                #Cost of additionals + increasing cost
+            if green_buy.collidepoint(event.pos) and score >= green_cost:
+                green_value += .15
+                score -= green_cost
+                green_cost += .25
+            if red_buy.collidepoint(event.pos) and score >= red_cost:
+                red_value += .25
+                score -= red_cost
+                red_cost += .35
+            if orange_buy.collidepoint(event.pos) and score >= orange_cost:
+                orange_value += .5
+                score -= orange_cost
+                orange_cost += .65
+            if white_buy.collidepoint(event.pos) and score >= white_cost:
+                white_value += 1
+                score -= white_cost
+                white_cost += 1.5
+            if purple_buy.collidepoint(event.pos) and score >= purple_cost:
+                purple_value += 2
+                score -= purple_cost
+                purple_cost += 2.5
+                
+                
     if game_active:
-        #Background shown
-        screen.blit(sky_surface,(0,0))
-        screen.blit(ground_surface,(0,500))
-        screen.blit(text_surf,text_rect)
-        score = display_score()
-
-        #Enemy Movement
-        obstacle_rect_list = obstacle_movement(obstacle_rect_list)
-        game_active = collisions(player_rect,obstacle_rect_list)
-    
-        #Player object, Floor & Jump Height
-        player_gravity +=1
-        player_rect.y += player_gravity
-        player_animation()
-        if player_rect.bottom >= 500:
-            player_rect.bottom = 500
-
-        screen.blit(player_surf,player_rect)
-        #Jump input    
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_SPACE] and player_rect.bottom == 500:
-            player_gravity = -20
-    else:
-        #Make screen this colour, show various objects for score, instructions, player object for QOL 
-        #Resets player and objects for next game if needed.
-        screen.fill((94,129,162))
-        screen.blit(player_stand_scaled, player_stand_rect) 
-        obstacle_rect_list.clear()
-        player_rect.midbottom = (100,500)
-        player_gravity = 0
+        screen.fill(background)
+        #Task Shapes & Interaction
+        task1, green_length, draw_green = draw_task(green, 50, green_value, draw_green, green_length, green_speed)
+        task2, red_length, draw_red = draw_task(red, 110,red_value, draw_red, red_length, red_speed)
+        task3, orange_length, draw_orange = draw_task(orange, 170, orange_value,draw_orange, orange_length, orange_speed)
+        task4, white_length, draw_white = draw_task(white, 230, white_value, draw_white, white_length, white_speed)
+        task5, purple_length, draw_purple = draw_task(purple, 290, purple_value, draw_purple, purple_length, purple_speed)
         
-        score_message = test_font.render(f'Your score: {score}',False,(111,196,169))
-        score_message_rect = score_message.get_rect(center = (400, 350))
-        screen.blit(game_name, game_name_rect)
-            
-        if score == 0:
-            screen.blit(play_again, play_again_rect)
-        else:
-            screen.blit(play_again, play_again_rect)
-            screen.blit(score_message, score_message_rect)
-            start_time = int(pygame.time.get_ticks() / 1000)
-            
-    pygame.display.update()
-    clock.tick(60)
+        #Manager Shapes and Interaction
+        green_buy, green_manager_buy = draw_buttons(green, 10, green_cost, green_owned, green_manager_cost)
+        red_buy, red_manager_buy = draw_buttons(red, 70, red_cost, red_owned, red_manager_cost)
+        orange_buy, orange_manager_buy = draw_buttons(orange, 130, orange_cost, orange_owned, orange_manager_cost)
+        white_buy, white_manager_buy = draw_buttons(white, 190, white_cost, white_owned, white_manager_cost)
+        purple_buy, purple_manager_buy = draw_buttons(purple, 250, purple_cost, purple_owned, purple_manager_cost)
+        
+        #Display scores, buttons 
+        display_score = font.render('Money: £'+str(round(score, 2)), True, white, black)
+        screen.blit(display_score, (10,5))
+        buy_more = font.render('Buy more: ', True, white)
+        screen.blit(buy_more, (10,315)) 
+        buy_managers = font.render('Buy managers: ', True, white)
+        screen.blit(buy_managers, (10,380)) 
+        pygame.display.flip()
+        
+pygame.quit()
