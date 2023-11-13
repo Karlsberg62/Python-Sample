@@ -1,10 +1,15 @@
 def createboard():
+#Creates a clean board list 
+
     board = [0, 1, 2,
              3, 4, 5,
              6, 7, 8
              ]
     return board
+
 def printboard(board):
+#Prints out each row/col of the board list
+
     y = 0
     x = 3
     for i in range(0,3):
@@ -12,11 +17,18 @@ def printboard(board):
         y = y+3
         x = x+3
     return board
+
 def boardchange(board, boardpos, arg):
+#Remove the list object at  players input of board position
+#Add a list object at the same board position input & insert the marker of the player
+
     board.remove(boardpos)
     board.insert(boardpos,arg)
     return board
+
 def playerinput():
+#Asks player for position on board aka Index
+
     inputcheck = True
     while inputcheck:
         boardpos = input("Please enter the position you would like to change: ")
@@ -28,6 +40,8 @@ def playerinput():
             continue
 
 def markerassigned():
+#Assigns a marker to each player at random
+
     import random
     playerturn = random.randint(0,1)
     if playerturn == 0:
@@ -38,7 +52,9 @@ def markerassigned():
         player2marker = 'X'
 
     return player1marker, player2marker
+
 def endconditions(board):
+#Win conditions for row, col, diagonals
 
     if (board[0]== board[1] == board[2]) or \
         (board[3]==board[4]==board[5]) or \
@@ -50,18 +66,28 @@ def endconditions(board):
         (board[1]==board[4]==board[7]) or \
         (board[2]==board[5]==board[8]):
         return True
+
 def full_board_check(board):
+#Check if all positions on board are used. Total of ints in board. 
+
     int_sum = sum([i for i in board if isinstance(i,int)])
     if int_sum == 0:
         return True
     else:
         return False
 
+#Variable declarations
 program_on = True
 game_on = True
 turn = "player 1"
 player1marker = ''
 player2marker = ''
+
+#Double while loop, one for program. One for game state.
+#In game state, creates a board, assigns the markers. 
+#Prints the board each turn, asks for input, alters the board
+#Checks win and draw condition, then switches turns in loop
+#When game ends, asks if you want to play again to exit all loops
 
 while program_on:
     programcheck = input("Want to play? Y/N ").lower()
