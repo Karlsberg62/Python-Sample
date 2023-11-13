@@ -1,0 +1,113 @@
+def createboard():
+    board = [0, 1, 2,
+             3, 4, 5,
+             6, 7, 8
+             ]
+    return board
+def printboard(board):
+    y = 0
+    x = 3
+    for i in range(0,3):
+        print(board[y:x])
+        y = y+3
+        x = x+3
+    return board
+def boardchange(board, boardpos, arg):
+    board.remove(boardpos)
+    board.insert(boardpos,arg)
+    return board
+def playerinput():
+    inputcheck = True
+    while inputcheck:
+        boardpos = input("Please enter the position you would like to change: ")
+        if boardpos.isdigit():
+            boardpos = int(boardpos)
+            return boardpos
+            break
+        else:
+            continue
+
+def markerassigned():
+    import random
+    playerturn = random.randint(0,1)
+    if playerturn == 0:
+        player1marker = 'X'
+        player2marker = 'O'
+    else:
+        player1marker = 'O'
+        player2marker = 'X'
+
+    return player1marker, player2marker
+def endconditions(board):
+
+    if (board[0]== board[1] == board[2]) or \
+        (board[3]==board[4]==board[5]) or \
+        (board[3]==board[4]==board[5]) or \
+        (board[6]==board[7]==board[8]) or \
+        (board[0]==board[4]==board[8]) or \
+        (board[2]==board[4]==board[6]) or \
+        (board[0]==board[3]==board[6]) or \
+        (board[1]==board[4]==board[7]) or \
+        (board[2]==board[5]==board[8]):
+        return True
+def full_board_check(board):
+    int_sum = sum([i for i in board if isinstance(i,int)])
+    if int_sum == 0:
+        return True
+    else:
+        return False
+
+program_on = True
+game_on = True
+turn = "player 1"
+player1marker = ''
+player2marker = ''
+
+while program_on:
+    programcheck = input("Want to play? Y/N ").lower()
+    if programcheck == 'y':
+        game_on = True
+        board = createboard()
+        player1marker,player2marker = markerassigned()
+        print(f"Player 1 will be {player1marker}. \nPlayer 2 will be {player2marker}.")
+
+        while game_on:
+            if turn == "player 1":
+                printboard(board)
+                print("It is player 1's turn")
+                boardpos = playerinput()
+                boardchange(board,boardpos,player1marker)
+
+                if endconditions(board):
+                    printboard(board)
+                    print("Congrats player 1, you win")
+                    game_on = False
+                else:
+                    if full_board_check(board):
+                        printboard(board)
+                        print("This game is a draw")
+                        game_on = False
+                    else:
+                        turn = "player 2"
+
+            if turn == "player 2":
+                printboard(board)
+                print("It is player 2's turn")
+                boardpos = playerinput()
+                boardchange(board, boardpos, player2marker)
+
+                if endconditions(board):
+                    printboard(board)
+                    print("Congrats player 2, you win")
+                    game_on = False
+                else:
+                    if full_board_check(board):
+                        printboard(board)
+                        print("This game is a draw")
+                        game_on = False
+                    else:
+                        turn = "player 1"
+    elif programcheck == 'n':
+        break
+    else:
+        continue
